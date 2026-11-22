@@ -193,33 +193,11 @@ class _SpellCheckPageState extends State<SpellCheckPage> {
   }
 
   List<SpellIssue> checkSpellingLocal(String text) {
-    if (!_dictLoaded) return [];
-
-    final allDict = {..._dictionary, ..._customDictionary};
-    final issues = <SpellIssue>[];
-    final wordPattern = RegExp(r'[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]+');
-
-    for (final match in wordPattern.allMatches(text)) {
-      final word = match.group(0)!;
-      if (word.length < 3) continue;
-
-      // اگر در دیکشنری نیست
-      if (!allDict.contains(word)) {
-        final suggestions = findSuggestions(word, allDict, maxDistance: 2, maxSuggestions: 4);
-        issues.add(SpellIssue(
-          start: match.start,
-          end: match.end,
-          original: word,
-          suggestion: suggestions.isNotEmpty ? suggestions.first : '',
-          message: suggestions.isNotEmpty
-              ? 'املای احتمالی نادرست'
-              : 'کلمه در دیکشنری یافت نشد',
-          type: IssueType.spelling,
-          allSuggestions: suggestions,
-        ));
-      }
-    }
-    return issues;
+    // فعلاً بررسی دیکشنری محلی غیرفعال است
+    // چون دیکشنری کوچک باعث تشخیص اشتباه کلمات درست می‌شود
+    // (مثل «بخیر» یا «جان»)
+    // فقط قوانین نگارشی و بررسی آنلاین فعال هستند
+    return [];
   }
 
   Future<List<SpellIssue>> checkOnline(String text) async {
@@ -308,7 +286,8 @@ class _SpellCheckPageState extends State<SpellCheckPage> {
     setState(() {
       _issues = allIssues;
       if (allIssues.isEmpty) {
-        _statusMessage = '✓ هیچ خطای املایی یا نگارشی پیدا نشد.';
+        _statusMessage = '✓ هیچ خطای نگارشی پیدا نشد.
+(بررسی املای کلمه‌به‌کلمه فعلاً فقط از طریق آنلاین انجام می‌شود)';
       } else {
         _statusMessage = '${allIssues.length} مورد پیدا شد:';
       }
