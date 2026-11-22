@@ -422,7 +422,7 @@ class _SpellCheckPageState extends State<SpellCheckPage> {
                         border: InputBorder.none,
                         hintStyle: TextStyle(color: Colors.grey.shade500),
                       ),
-                      spellCheckConfiguration: const SpellCheckConfiguration(
+                      spellCheckConfiguration: SpellCheckConfiguration(
                         spellCheckService: DefaultSpellCheckService(),
                       ),
                     ),
