@@ -1,0 +1,61 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.5'
+          channel: 'stable'
+          cache: true
+
+      - name: Create Flutter project structure
+        run: |
+          # ساخت یک پروژه موقت کامل
+          flutter create --org com.spellchecker --project-name persian_kurdish_spellchecker temp_project
+          
+          # کپی کردن فایل‌های اصلی پروژه ما روی پروژه موقت
+          rm -rf temp_project/lib
+          cp -r lib temp_project/
+          
+          if [ -d "assets" ]; then
+            rm -rf temp_project/assets
+            cp -r assets temp_project/
+          fi
+          
+          # کپی pubspec.yaml
+          cp pubspec.yaml temp_project/
+          
+          # رفتن داخل پروژه موقت
+          cd temp_project
+          
+          # گرفتن وابستگی‌ها
+          flutter pub get
+
+      - name: Build APK (Release)
+        working-directory: temp_project
+        run: flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release
+          path: temp_project/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
